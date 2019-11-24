@@ -1,5 +1,5 @@
  name: "natashdi"
- output_dir: "."
+ output_dir: "docs"
  navbar:
   title: "Data Science Portfolio"
  left:
