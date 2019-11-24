@@ -1,13 +1,15 @@
- name: "natashdi"
- output_dir: "docs"
- navbar:
+name: "natashdi"
+output_dir: "docs"
+navbar:
   title: "Data Science Portfolio"
- left:
+  left:
     - text: "Home"
       href: index.html
-    - text: "Flight Data Exploration" 
+    - text: "Flight Data Exploration"
       href: explore.html
- output:
+output:
   html_document:
     theme: cosmo
     highlight: textmate
+
+
