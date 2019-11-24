@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Flight Data Exploration</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Data Science Portfolio</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Flight Data Exploration</h1>
+
+</div>
+
+
+<p>In this project the data for only Ryanair flights was analyzed.</p>
+<p>It was collected for four routes:</p>
+<ul>
+<li>Berlin Schönefeld - London Stansted (SXF-STN)<br/></li>
+<li>London Stansted - Berlin Schönefeld (STN-SXF)<br/></li>
+<li>Frankfurt International - London Stansted (FRA-STN)<br/></li>
+<li>London Stansted - Frankfurt International (STN-FRA)<br/></li>
+</ul>
+<p>And was gathered between 2nd of June 2019 and 3rd of August 2019 from the official website of the low-cost airline Ryanair, for flights that took a place from 2nd of June till 10th of September 2019.</p>
+<p>Before exploring and visualizing steps a data preparation had to be done.</p>
+<pre class="r"><code>setwd(&quot;/Users/natadi/Documents/Final Master&quot;)
+
+#Loading libriries ----
+library(dplyr)
+library(tidyverse)
+library(lubridate)
+library(magrittr)
+library(ggplot2)
+library(timetk)
+library(kableExtra)
+library(modelr)
+library(caret)
+library(randomForest)
+library(rpart)
+library(fastDummies)
+library(tictoc)
+library(Hmisc)
+library(xgboost)
+library(DMwR)
+library(hrbrthemes)
+library(tidyquant)
+
+set.seed(1)
+
+# Function Definition ----
+minimum_price &lt;- function(Target_var, positioning){
+  #print(Target_var)
+  #print(positioning)
+  minim_price = min(Target_var[positioning + 1 : length(Target_var)], na.rm = T) 
+  return(minim_price)
+}
+
+# 1. Loading Data ----
+
+  # 1.a Get Excel Path ----
+csv_paths_tbl &lt;- fs::dir_info(&quot;all/&quot;)
+
+  # 1.b Reading all the csv files in the folder  ----
+csv_tbl &lt;- csv_paths_tbl %&gt;% 
+  select(path) %&gt;% 
+  mutate(data = path %&gt;% map(read_csv))
+
+  # 1.c Unnesting (Create one united dataframe) ----
+csv_tbl_unnested_raw &lt;- csv_tbl %&gt;% 
+  unnest(data, .id = &quot;ID&quot;) %&gt;% 
+  # remove all the nas
+  na.omit()
+
+# 2. Cleaning and transforming the raw input data ----
+csv_tbl_unnested &lt;- csv_tbl_unnested_raw  %&gt;% 
+  
+  # 2.a Remove the euro sign from the price and turn the price into numeric ----
+  separate(links_flight_price, into = c(&quot;Currency&quot;, &quot;Price&quot;), sep = &quot; &quot;) %&gt;% 
+  mutate(Price = Price %&gt;% as.numeric()) %&gt;% 
+  
+  # 2.b convert the links_flight_date to date ----
+  mutate(Flight_Date = paste(links_flight_date, &quot;2019&quot;)) %&gt;% 
+  mutate(Flight_Date = lubridate::dmy(Flight_Date)) %&gt;% 
+  
+  # 2.c Extract the request date ----
+  separate(path, into = c(&quot;Destination_abb&quot;, &quot;Date_and_csv&quot;), sep = &quot;/&quot;) %&gt;% 
+  separate(Date_and_csv, into = c(&quot;Request_Date&quot;, &quot;TimeRequest&quot;, &quot;Route_t&quot;), sep = &quot; &quot;) %&gt;%
+  separate(Route_t, into = c(&quot;Route&quot;), sep = &quot;.csv&quot;) %&gt;% 
+  separate(TimeRequest, into = c(&quot;request_hours&quot;, &quot;request_minute&quot;)) %&gt;% 
+  mutate(Request_Date_ymd = Request_Date %&gt;% ymd()) %&gt;% 
+  mutate(Request_Date = paste0(Request_Date, request_hours, sep = &quot; &quot;) %&gt;% ymd_h()) %&gt;% 
+  
+  # 2.d Create a new variable: DaysLeft ----
+  mutate(DaysLeft = (difftime(Flight_Date, Request_Date_ymd, units = &quot;days&quot;))) %&gt;% 
+  select(-Request_Date_ymd) %&gt;% 
+  mutate(flight_unique_id = paste(Flight_Date, links_flight_name)) %&gt;%
+
+  #2.f. Remove some rows from duration column
+  filter(!(links_flight_duration %in% 
+             (c(&quot;(trips.flight_list_table.time_difference.hours_mins)&quot;,&quot;(trips.flight_list_table.time_difference.hours)&quot; )))) %&gt;%
+  filter(!(Currency %in%
+             (c(&quot;37.27&quot;, &quot;31.20&quot;, &quot;22.02&quot;))))
+  
+# 3. Price: New features generation ----
+
+csv_tbl_unnested &lt;- csv_tbl_unnested %&gt;% 
+  group_by(flight_unique_id) %&gt;%
+  #arrange(desc(DaysLeft)) %&gt;% 
+  
+  # 3.a Minimum price so far ----
+  mutate(min_price_so_far = map(seq_along(Price),
+                                .f = ~min(Price[1:.x]))) %&gt;%
+  unnest(min_price_so_far) %&gt;% 
+  
+  # 3.b Maximum price so far ----
+  mutate(max_price_so_far = map(seq_along(Price),
+                                .f = ~max(Price[1:.x]))) %&gt;% 
+  unnest(max_price_so_far) %&gt;% 
+  
+  # 3.c Previous price and difference between current and previous price
+  mutate(previous_price = lag(Price)) %&gt;% 
+  mutate(difference_previous_price = Price - previous_price) %&gt;%
+  ungroup() %&gt;% 
+  
+  drop_na() 
+
+  # 3.d Diff_pr_flight_cost, Diff_nx_flight_cost ----
+csv_tbl_unnested &lt;- csv_tbl_unnested %&gt;% 
+  mutate(departure_date_time = paste(Flight_Date, links_flight_departure, sep = &quot; &quot;) %&gt;% 
+         ymd_hms()) %&gt;%
+  mutate(dest_req_id = paste(Request_Date, Route)) %&gt;%
+  group_by(dest_req_id) %&gt;%
+  arrange(departure_date_time) %&gt;%
+  mutate(diff_pr_flight_cost = Price - lag(Price), 
+         diff_pr_flight_cost2 = Price - lag(Price, n =2),
+         diff_nx_flight_cost = Price - lead(Price),
+         diff_nx_flight_cost2 = Price - lead(Price, n = 2)) %&gt;% 
+  ungroup() %&gt;%
+  drop_na() %&gt;% 
+  select(-dest_req_id)
+
+# 4. Target variable: buy_or_wait
+
+csv_tbl_unnested &lt;- csv_tbl_unnested %&gt;%
+
+  group_by(flight_unique_id) %&gt;%
+  #arrange(DaysLeft) %&gt;%
+  mutate(&quot;Positioning&quot; = 1:n()) %&gt;%
+  mutate(tot_rows = n()) %&gt;%
+  filter(tot_rows &gt; 3) %&gt;%
+  mutate(min_future_price = map2(seq_along(Positioning),
+                          Price,
+                          .f = ~minimum_price(Target_var = Price,
+                                              positioning = Positioning[.x]))) %&gt;%
+  ungroup() %&gt;% 
+  unnest(min_future_price) %&gt;% 
+  mutate(buy_or_wait = case_when(min_future_price &gt;= Price - 2 ~ 1,
+                                      TRUE ~ 0)) %&gt;% 
+  select(-min_future_price)
+
+csv_tbl_unnested$buy_or_wait %&gt;% table() %&gt;% prop.table()
+
+# 5. Date: related features generation  ----
+
+csv_tbl_unnested &lt;- csv_tbl_unnested %&gt;% 
+  
+  # 5.a Departure: month, day of the week, week of the month ---- 
+
+  .$Flight_Date %&gt;%
+  tk_get_timeseries_signature() %&gt;%
+  select(month, month.lbl, wday, wday.lbl, mweek) %&gt;%
+  
+  rename(departure_month = month) %&gt;% 
+  rename(departure_month.lbl = month.lbl) %&gt;% 
+  rename(departure_wday = wday) %&gt;% 
+  rename(departure_wday.lbl = wday.lbl) %&gt;% 
+  rename(departure_mweek = mweek) %&gt;% 
+  bind_cols(csv_tbl_unnested) 
+
+csv_tbl_unnested &lt;- csv_tbl_unnested %&gt;% 
+  
+  # 5.b Request: month, day of the week, week of the month ---- 
+
+  .$Request_Date %&gt;%
+  tk_get_timeseries_signature() %&gt;%
+  select(month, month.lbl, wday, wday.lbl, mweek) %&gt;%
+  rename(request_month = month) %&gt;% 
+  rename(request_month.lbl = month.lbl) %&gt;% 
+  rename(request_wday = wday) %&gt;% 
+  rename(request_wday.lbl = wday.lbl) %&gt;% 
+  rename(request_mweek = mweek) %&gt;% 
+  bind_cols(csv_tbl_unnested) </code></pre>
+<div id="data-exploration" class="section level3">
+<h3>Data Exploration</h3>
+<div id="summary-of-the-data-and-unique-values" class="section level4">
+<h4>Summary of the data and unique values</h4>
+<p>During data exploration original eight variables were checked for unique values. There are four routes in the data: FRA-STN, STN-FRA, STN-SXF, SXF-STN. In total there are 12 different flight numbers. Three origin and three destination air- port names: Frankfurt International, London Stansted and Berlin Schönefeld. Price is described by two types of currency, euro and pound.</p>
+<pre class="r"><code># Structure of the dataset ----
+csv_tbl_unnested %&gt;%
+  head() %&gt;%
+  knitr::kable() %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;,&quot;responsive&quot;))</code></pre>
+<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:right;">
+request_month
+</th>
+<th style="text-align:left;">
+request_month.lbl
+</th>
+<th style="text-align:right;">
+request_wday
+</th>
+<th style="text-align:left;">
+request_wday.lbl
+</th>
+<th style="text-align:right;">
+request_mweek
+</th>
+<th style="text-align:right;">
+departure_month
+</th>
+<th style="text-align:left;">
+departure_month.lbl
+</th>
+<th style="text-align:right;">
+departure_wday
+</th>
+<th style="text-align:left;">
+departure_wday.lbl
+</th>
+<th style="text-align:right;">
+departure_mweek
+</th>
+<th style="text-align:left;">
+Destination_abb
+</th>
+<th style="text-align:left;">
+Request_Date
+</th>
+<th style="text-align:left;">
+request_hours
+</th>
+<th style="text-align:left;">
+request_minute
+</th>
+<th style="text-align:left;">
+Route
+</th>
+<th style="text-align:left;">
+links_link
+</th>
+<th style="text-align:left;">
+links_flight_name
+</th>
+<th style="text-align:left;">
+links_flight_date
+</th>
+<th style="text-align:left;">
+links_flight_departure
+</th>
+<th style="text-align:left;">
+links_flight_origin
+</th>
+<th style="text-align:left;">
+links_flight_arrival
+</th>
+<th style="text-align:left;">
+links_flight_destination
+</th>
+<th style="text-align:left;">
+links_flight_duration
+</th>
+<th style="text-align:left;">
+Currency
+</th>
+<th style="text-align:right;">
+Price
+</th>
+<th style="text-align:left;">
+Flight_Date
+</th>
+<th style="text-align:left;">
+DaysLeft
+</th>
+<th style="text-align:left;">
+flight_unique_id
+</th>
+<th style="text-align:right;">
+min_price_so_far
+</th>
+<th style="text-align:right;">
+max_price_so_far
+</th>
+<th style="text-align:right;">
+previous_price
+</th>
+<th style="text-align:right;">
+difference_previous_price
+</th>
+<th style="text-align:left;">
+departure_date_time
+</th>
+<th style="text-align:right;">
+diff_pr_flight_cost
+</th>
+<th style="text-align:right;">
+diff_pr_flight_cost2
+</th>
+<th style="text-align:right;">
+diff_nx_flight_cost
+</th>
+<th style="text-align:right;">
+diff_nx_flight_cost2
+</th>
+<th style="text-align:right;">
+Positioning
+</th>
+<th style="text-align:right;">
+tot_rows
+</th>
+<th style="text-align:right;">
+buy_or_wait
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+June
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+Monday
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+June
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:left;">
+Wednesday
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+all
+</td>
+<td style="text-align:left;">
+2019-06-03 11:00:00
+</td>
+<td style="text-align:left;">
+11
+</td>
+<td style="text-align:left;">
+00
+</td>
+<td style="text-align:left;">
+SXF-STN
+</td>
+<td style="text-align:left;">
+<a href="https://www.ryanair.com/gb/en/booking/home/SXF/STN/2019-06-05//1/0/0/0" class="uri">https://www.ryanair.com/gb/en/booking/home/SXF/STN/2019-06-05//1/0/0/0</a>
+</td>
+<td style="text-align:left;">
+FR 146
+</td>
+<td style="text-align:left;">
+Wed 5 Jun
+</td>
+<td style="text-align:left;">
+19:50:00
+</td>
+<td style="text-align:left;">
+Berlin Schönefeld
+</td>
+<td style="text-align:left;">
+20:35:00
+</td>
+<td style="text-align:left;">
+London Stansted
+</td>
+<td style="text-align:left;">
+(1 hr 45 mins)
+</td>
+<td style="text-align:left;">
+€
+</td>
+<td style="text-align:right;">
+208.07
+</td>
+<td style="text-align:left;">
+2019-06-05
+</td>
+<td style="text-align:left;">
+2 days
+</td>
+<td style="text-align:left;">
+2019-06-05 FR 146
+</td>
+<td style="text-align:right;">
+208.07
+</td>
+<td style="text-align:right;">
+208.07
+</td>
+<td style="text-align:right;">
+208.07
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:left;">
+2019-06-05 19:50:00
+</td>
+<td style="text-align:right;">
+162.18
+</td>
+<td style="text-align:right;">
+185.90
+</td>
+<td style="text-align:right;">
+185.90
+</td>
+<td style="text-align:right;">
+-51.00
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+June
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+Monday
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+June
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:left;">
+Wednesday
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+all
+</td>
+<td style="text-align:left;">
+2019-06-03 23:00:00
+</td>
+<td style="text-align:left;">
+23
+</td>
+<td style="text-align:left;">
+00
+</td>
+<td style="text-align:left;">
+SXF-STN
+</td>
+<td style="text-align:left;">
+<a href="https://www.ryanair.com/gb/en/booking/home/SXF/STN/2019-06-05//1/0/0/0" class="uri">https://www.ryanair.com/gb/en/booking/home/SXF/STN/2019-06-05//1/0/0/0</a>
+</td>
+<td style="text-align:left;">
+FR 146
+</td>
+<td style="text-align:left;">
+Wed 5 Jun
+</td>
+<td style="text-align:left;">
+19:50:00
+</td>
+<td style="text-align:left;">
+Berlin Schönefeld
+</td>
+<td style="text-align:left;">
+20:35:00
+</td>
+<td style="text-align:left;">
+London Stansted
+</td>
+<td style="text-align:left;">
+(1 hr 45 mins)
+</td>
+<td style="text-align:left;">
+€
+</td>
+<td style="text-align:right;">
+259.07
+</td>
+<td style="text-align:left;">
+2019-06-05
+</td>
+<td style="text-align:left;">
+2 days
+</td>
+<td style="text-align:left;">
+2019-06-05 FR 146
+</td>
+<td style="text-align:right;">
+208.07
+</td>
+<td style="text-align:right;">
+259.07
+</td>
+<td style="text-align:right;">
+208.07
+</td>
+<td style="text-align:right;">
+51.00
+</td>
+<td style="text-align:left;">
+2019-06-05 19:50:00
+</td>
+<td style="text-align:right;">
+197.88
+</td>
+<td style="text-align:right;">
+236.90
+</td>
+<td style="text-align:right;">
+236.90
+</td>
+<td style="text-align:right;">
+185.64
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+June
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:left;">
+Tuesday
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+June
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:left;">
+Wednesday
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+all
+</td>
+<td style="text-align:left;">
+2019-06-04 11:00:00
+</td>
+<td style="text-align:left;">
+11
+</td>
+<td style="text-align:left;">
+00
+</td>
+<td style="text-align:left;">
+SXF-STN
+</td>
+<td style="text-align:left;">
+<a href="https://www.ryanair.com/gb/en/booking/home/SXF/STN/2019-06-05//1/0/0/0" class="uri">https://www.ryanair.com/gb/en/booking/home/SXF/STN/2019-06-05//1/0/0/0</a>
+</td>
+<td style="text-align:left;">
+FR 146
+</td>
+<td style="text-align:left;">
+Wed 5 Jun
+</td>
+<td style="text-align:left;">
+19:50:00
+</td>
+<td style="text-align:left;">
+Berlin Schönefeld
+</td>
+<td style="text-align:left;">
+20:35:00
+</td>
+<td style="text-align:left;">
+London Stansted
+</td>
+<td style="text-align:left;">
+(1 hr 45 mins)
+</td>
+<td style="text-align:left;">
+€
+</td>
+<td style="text-align:right;">
+259.07
+</td>
+<td style="text-align:left;">
+2019-06-05
+</td>
+<td style="text-align:left;">
+1 days
+</td>
+<td style="text-align:left;">
+2019-06-05 FR 146
+</td>
+<td style="text-align:right;">
+208.07
+</td>
+<td style="text-align:right;">
+259.07
+</td>
+<td style="text-align:right;">
+259.07
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:left;">
+2019-06-05 19:50:00
+</td>
+<td style="text-align:right;">
+197.88
+</td>
+<td style="text-align:right;">
+224.81
+</td>
+<td style="text-align:right;">
+230.52
+</td>
+<td style="text-align:right;">
+185.64
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+June
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:left;">
+Tuesday
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+June
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:left;">
+Wednesday
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+all
+</td>
+<td style="text-align:left;">
+2019-06-04 23:00:00
+</td>
+<td style="text-align:left;">
+23
+</td>
+<td style="text-align:left;">
+00
+</td>
+<td style="text-align:left;">
+SXF-STN
+</td>
+<td style="text-align:left;">
+<a href="https://www.ryanair.com/gb/en/booking/home/SXF/STN/2019-06-05//1/0/0/0" class="uri">https://www.ryanair.com/gb/en/booking/home/SXF/STN/2019-06-05//1/0/0/0</a>
+</td>
+<td style="text-align:left;">
+FR 146
+</td>
+<td style="text-align:left;">
+Wed 5 Jun
+</td>
+<td style="text-align:left;">
+19:50:00
+</td>
+<td style="text-align:left;">
+Berlin Schönefeld
+</td>
+<td style="text-align:left;">
+20:35:00
+</td>
+<td style="text-align:left;">
+London Stansted
+</td>
+<td style="text-align:left;">
+(1 hr 45 mins)
+</td>
+<td style="text-align:left;">
+€
+</td>
+<td style="text-align:right;">
+259.07
+</td>
+<td style="text-align:left;">
+2019-06-05
+</td>
+<td style="text-align:left;">
+1 days
+</td>
+<td style="text-align:left;">
+2019-06-05 FR 146
+</td>
+<td style="text-align:right;">
+208.07
+</td>
+<td style="text-align:right;">
+259.07
+</td>
+<td style="text-align:right;">
+259.07
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:left;">
+2019-06-05 19:50:00
+</td>
+<td style="text-align:right;">
+153.00
+</td>
+<td style="text-align:right;">
+208.08
+</td>
+<td style="text-align:right;">
+208.08
+</td>
+<td style="text-align:right;">
+197.88
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+June
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+Monday
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+June
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:left;">
+Wednesday
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+all
+</td>
+<td style="text-align:left;">
+2019-06-03 11:00:00
+</td>
+<td style="text-align:left;">
+11
+</td>
+<td style="text-align:left;">
+00
+</td>
+<td style="text-align:left;">
+STN-SXF
+</td>
+<td style="text-align:left;">
+<a href="https://www.ryanair.com/gb/en/booking/home/STN/SXF/2019-06-05//1/0/0/0" class="uri">https://www.ryanair.com/gb/en/booking/home/STN/SXF/2019-06-05//1/0/0/0</a>
+</td>
+<td style="text-align:left;">
+FR 147
+</td>
+<td style="text-align:left;">
+Wed 5 Jun
+</td>
+<td style="text-align:left;">
+21:00:00
+</td>
+<td style="text-align:left;">
+London Stansted
+</td>
+<td style="text-align:left;">
+23:50:00
+</td>
+<td style="text-align:left;">
+Berlin Schönefeld
+</td>
+<td style="text-align:left;">
+(1 hr 50 mins)
+</td>
+<td style="text-align:left;">
+£
+</td>
+<td style="text-align:right;">
+127.49
+</td>
+<td style="text-align:left;">
+2019-06-05
+</td>
+<td style="text-align:left;">
+2 days
+</td>
+<td style="text-align:left;">
+2019-06-05 FR 147
+</td>
+<td style="text-align:right;">
+127.49
+</td>
+<td style="text-align:right;">
+127.49
+</td>
+<td style="text-align:right;">
+127.49
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:left;">
+2019-06-05 21:00:00
+</td>
+<td style="text-align:right;">
+-95.88
+</td>
+<td style="text-align:right;">
+38.76
+</td>
+<td style="text-align:right;">
+-24.48
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+June
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+Monday
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+June
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:left;">
+Wednesday
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+all
+</td>
+<td style="text-align:left;">
+2019-06-03 23:00:00
+</td>
+<td style="text-align:left;">
+23
+</td>
+<td style="text-align:left;">
+00
+</td>
+<td style="text-align:left;">
+STN-SXF
+</td>
+<td style="text-align:left;">
+<a href="https://www.ryanair.com/gb/en/booking/home/STN/SXF/2019-06-05//1/0/0/0" class="uri">https://www.ryanair.com/gb/en/booking/home/STN/SXF/2019-06-05//1/0/0/0</a>
+</td>
+<td style="text-align:left;">
+FR 147
+</td>
+<td style="text-align:left;">
+Wed 5 Jun
+</td>
+<td style="text-align:left;">
+21:00:00
+</td>
+<td style="text-align:left;">
+London Stansted
+</td>
+<td style="text-align:left;">
+23:50:00
+</td>
+<td style="text-align:left;">
+Berlin Schönefeld
+</td>
+<td style="text-align:left;">
+(1 hr 50 mins)
+</td>
+<td style="text-align:left;">
+£
+</td>
+<td style="text-align:right;">
+223.37
+</td>
+<td style="text-align:left;">
+2019-06-05
+</td>
+<td style="text-align:left;">
+2 days
+</td>
+<td style="text-align:left;">
+2019-06-05 FR 147
+</td>
+<td style="text-align:right;">
+127.49
+</td>
+<td style="text-align:right;">
+223.37
+</td>
+<td style="text-align:right;">
+127.49
+</td>
+<td style="text-align:right;">
+95.88
+</td>
+<td style="text-align:left;">
+2019-06-05 21:00:00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+71.40
+</td>
+<td style="text-align:right;">
+95.88
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>csv_tbl_unnested %&gt;% dim() </code></pre>
+<pre><code>## [1] 89207    40</code></pre>
+<pre class="r"><code># Unique values
+csv_tbl_unnested %&gt;% 
+  select_if(is.character) %&gt;% 
+  select(-flight_unique_id, -links_link, -links_flight_date, -request_minute, -Destination_abb) %&gt;% 
+  map(~unique(.)) </code></pre>
+<pre><code>## $request_hours
+## [1] &quot;11&quot; &quot;23&quot;
+## 
+## $Route
+## [1] &quot;SXF-STN&quot; &quot;STN-SXF&quot; &quot;STN-FRA&quot; &quot;FRA-STN&quot;
+## 
+## $links_flight_name
+##  [1] &quot;FR 146&quot;  &quot;FR 147&quot;  &quot;FR 8545&quot; &quot;FR 144&quot;  &quot;FR 8542&quot; &quot;FR 8543&quot; &quot;FR 8544&quot;
+##  [8] &quot;FR 1547&quot; &quot;FR 145&quot;  &quot;FR 1687&quot; &quot;FR 1546&quot; &quot;FR 1686&quot;
+## 
+## $links_flight_origin
+## [1] &quot;Berlin Schönefeld&quot;       &quot;London Stansted&quot;        
+## [3] &quot;Frankfurt International&quot;
+## 
+## $links_flight_destination
+## [1] &quot;London Stansted&quot;         &quot;Berlin Schönefeld&quot;      
+## [3] &quot;Frankfurt International&quot;
+## 
+## $links_flight_duration
+## [1] &quot;(1 hr 45 mins)&quot; &quot;(1 hr 50 mins)&quot; &quot;(2 hr)&quot;         &quot;(1 hr 55 mins)&quot;
+## [5] &quot;(1 hr 35 mins)&quot;
+## 
+## $Currency
+## [1] &quot;€&quot; &quot;£&quot;</code></pre>
+</div>
+<div id="split-of-the-flights-by-day-of-the-week" class="section level4">
+<h4>Split of the flights by day of the week</h4>
+<p>The table below shows that there are less flights on Wednesday, Saturday and Sunday, since there are less flights scheduled on these days.</p>
+<pre class="r"><code>csv_tbl_unnested %&gt;% 
+  select(departure_wday.lbl) %&gt;% table() %&gt;% 
+  prop.table()</code></pre>
+<pre><code>## .
+##    Sunday    Monday   Tuesday Wednesday  Thursday    Friday  Saturday 
+## 0.1290257 0.1594942 0.1522302 0.1266380 0.1507169 0.1525441 0.1293508</code></pre>
+</div>
+<div id="split-of-the-flights-by-hour-of-the-flight" class="section level4">
+<h4>Split of the flights by hour of the flight</h4>
+<p>The generated table demonstrates the amount of distributed flights between morning and evening almost equally.</p>
+<pre class="r"><code>csv_tbl_unnested %&gt;% 
+  mutate(links_flight_departure = links_flight_departure %&gt;% hour()) %&gt;% 
+  select(links_flight_departure) %&gt;% 
+  table() %&gt;% 
+  prop.table() </code></pre>
+<pre><code>## .
+##           6           7           8           9          10          18 
+## 0.208851323 0.177788739 0.050522941 0.001020099 0.079186611 0.151344625 
+##          19          21          22 
+## 0.240788279 0.012308451 0.078188931</code></pre>
+</div>
+<div id="price-summary-of-the-price-in-euros-for-flights-from-germany-to-london" class="section level4">
+<h4>Price: Summary of the price in euros for flights from Germany to London</h4>
+<pre class="r"><code>csv_tbl_unnested %&gt;% 
+ filter(Currency == &quot;€&quot;) %&gt;% 
+ select(Price) %&gt;%
+ summary() %&gt;%   
+ knitr::kable()</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+Price
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Min. : 8.99
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+1st Qu.: 33.45
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Median : 55.07
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Mean : 69.99
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+3rd Qu.: 88.73
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Max. :311.09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="price-summary-of-the-price-in-pounds-for-flights-from-london-to-germany" class="section level4">
+<h4>Price: Summary of the price in pounds for flights from London to Germany</h4>
+<pre class="r"><code>csv_tbl_unnested %&gt;% 
+ filter(Currency == &quot;£&quot;) %&gt;% 
+ select(Price) %&gt;%
+ summary() %&gt;%   
+ knitr::kable()</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+Price
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Min. : 9.99
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+1st Qu.: 29.37
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Median : 52.01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Mean : 68.65
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+3rd Qu.: 88.73
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Max. :334.87
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="visualization" class="section level3">
+<h3>Visualization</h3>
+<p>Once all the data had been collected and preprocessed, a data visualization step helps to understand the dataset, existent trends, correlations between variables, outliers and others. It is important to learn the data on a deeper level.</p>
+<div id="frequency-of-the-different-prices" class="section level5">
+<h5>Frequency of the different prices</h5>
+<p>In this part of the data exploration we checked the information of an important variable <strong>Price</strong>. The histogramm shows us that most of the tickets are being sold in the following price range: 29,37-88,73 pounds and 33,45-88,73 euros. The most common price for a ticket for the flights from London is 52,01 pounds and for flights from Germany is 55,07 euros. It was also found out, that the minimum price for the routes from London is 9,99 pounds and maximum price is 334,87 pounds, minimum price for routes to London is 8,99 euros and maximum price is 315,09 euros.</p>
+<p><em>On the histogram below <strong>blue</strong> dashed line identifies median price.</em> <br/> <em><strong>Yellow</strong> dashed line shows the mean price.</em></p>
+<pre class="r"><code>csv_tbl_unnested %&gt;% 
+  ggplot(aes(x = Price)) + 
+  geom_histogram(binwidth=11, fill=&quot;#c1c8d7&quot;, color=&quot;#e9ecef&quot;) +
+  theme(axis.text = element_text(size=16), axis.title.x = element_text(size = 18), axis.title.y = element_text(size = 18), strip.text = element_text(size = 20)) +
+  geom_vline(aes(xintercept = mean(Price)), color = &quot;#F4CA35&quot;, linetype = &quot;dashed&quot;, size = 1.2) +
+  theme_minimal() +
+  geom_vline(aes(xintercept = median(Price)), color = &quot;#0e3d8f&quot;, linetype = &quot;dashed&quot;, size = 1.2) +
+  facet_wrap(~Currency) </code></pre>
+<p><img src="explore_files/figure-html/Price_Variable,%20a_taller_figure-1.png" width="672" /></p>
+</div>
+<div id="price-trend-in-general-per-route" class="section level4">
+<h4>Price trend in general per route</h4>
+<p>Generally there is an inverse relationship between the flight price and days before the flight, by decreasing the number of the days the price tends to increase. This result is quite logical, most of the people try to buy a flight ticket in advance.</p>
+<p>Furthermore price for flight tickets from Berlin to London tends to increase rapidly much sooner comparing to other routes, around three months in advance. Price for other routes starts to rise later, two or two and a half months before a departure date. Tickets for the route from London to Frankfurt stays quiet cheap for the longest time among the routes and become expensive around 25 days before a flight.</p>
+<pre class="r"><code>csv_tbl_unnested %&gt;% 
+  ggplot(aes(x = DaysLeft, y = Price, group = flight_unique_id)) + 
+geom_point(aes(color = Route)) + 
+  facet_wrap(~Route, ncol = 4) + 
+  scale_x_reverse() + 
+  scale_color_manual(values = c(&quot;#ffa409&quot;, &quot;#0e3d8f&quot;,&quot;#F4CA35&quot;, &quot;#2091eb&quot;))+
+  theme(legend.position = &quot;none&quot;, axis.text = element_text(size=16), axis.title.x = element_text(size = 18), axis.title.y = element_text(size = 18), strip.text = element_text(size = 20)) +
+  theme_minimal()</code></pre>
+<p><img src="explore_files/figure-html/Price_trend_in_general,%20a_taller_figure-1.png" width="672" /></p>
+</div>
+<div id="price-trend-per-route-and-per-weekday" class="section level4">
+<h4>Price trend per route and per weekday</h4>
+<p>The next plot demonstrates that Sunday is the most popular travel day, for a possible reason a lot of people tend to fly back from their holidays or for business purposes on this day, so they can avoid stress travelling on the first working day – Monday.</p>
+<p>It can be also assumed that the reason for tickets being in a high demand for the weekend is due to the amount of flights scheduled on Saturday and Sunday. On the routes from London to Berlin and from Berlin to London there are only three flights scheduled on Saturday, Sunday and Wednesday, while on other days four flights are scheduled during the day on these routes. Routes Frankfurt-Berlin and Berlin-Frankfurt have consistently two flights per each weekday.</p>
+<pre class="r"><code>csv_tbl_unnested$departure_wday.lbl &lt;- factor(csv_tbl_unnested$departure_wday.lbl,
+                           labels = c(&quot;Sunday&quot;,&quot;Monday&quot;, &quot;Tuesday&quot;, &quot;Wednesday&quot;, &quot;Thursday&quot;, &quot;Friday&quot;, &quot;Saturday&quot; ))
+csv_tbl_unnested %&gt;%
+  ggplot(aes(x = DaysLeft, y =Price, group = flight_unique_id)) +
+  geom_point(aes(color = Route)) + 
+  scale_color_manual(values = c(&quot;#ffa409&quot;, &quot;#0e3d8f&quot;,&quot;#F4CA35&quot;, &quot;#2091eb&quot;))+
+  theme(legend.position = &quot;none&quot;, axis.text = element_text(size=12), axis.title.x = element_text(size = 14), axis.title.y = element_text(size = 14), strip.text = element_text(size = 12))+
+  facet_wrap(Route ~ departure_wday.lbl, ncol = 7) +
+  scale_x_reverse() +
+  theme_minimal()</code></pre>
+<p><img src="explore_files/figure-html/Price_trend_per_weekday,%20a_taller_figure-1.png" width="672" /></p>
+</div>
+<div id="flight-ptice-trend-per-time-of-the-day" class="section level4">
+<h4>Flight ptice trend per time of the day</h4>
+<p>It can be immediately noticed that plane tickets are in general more expensive when a flight is scheduled in the evening than in the morning. Prices start to increase earlier for evening flights than for morning.</p>
+<pre class="r"><code>csv_tbl_unnested %&gt;% 
+  mutate(hours = links_flight_departure %&gt;% hour()) %&gt;% 
+  mutate(time_of_the_day = case_when(hours &lt; 12 ~ &quot;Morning&quot;,
+                                    TRUE  ~ &quot;Evening&quot;)) %&gt;% 
+  ggplot(aes(x = DaysLeft, y = Price)) + 
+  theme(legend.position = &quot;none&quot;, axis.text = element_text(size=12), axis.title.x = element_text(size = 14), axis.title.y = element_text(size = 14), strip.text = element_text(size = 12))+
+  geom_point(aes(color = time_of_the_day)) + 
+  facet_wrap(time_of_the_day ~ Route, ncol = 4)  +
+  scale_x_reverse() +
+  scale_color_manual(values = c(&quot;#0e3d8f&quot;,&quot;#F4CA35&quot;)) +
+  theme_minimal()</code></pre>
+<p><img src="explore_files/figure-html/Price_trend_per_time_of_the_day,%20a_taller_figure-1.png" width="672" /></p>
+</div>
+<div id="flight-ptice-trend-per-time-of-the-day-and-a-week-day" class="section level4">
+<h4>Flight ptice trend per time of the day and a week day</h4>
+<p>Sunday evening is the most popular time during the week to travel, since a lot of tourists fly back home or workers for business trips in the evening, trying to avoid stressful travelling on the Monday morning. Although some people still prefer to travel on Monday morning, due to the possibility to rest the whole weekend home or to spend the whole weekend travelling.</p>
+<p>It was also learned from the plot that quite popular time to fly is the Monday evening. To fly on Friday morning and evening is common as well, a lot of people travel after work or university for the weekend in a different city or fly home.</p>
+<pre class="r"><code>csv_tbl_unnested %&gt;% 
+  mutate(hours = links_flight_departure %&gt;% hour()) %&gt;% 
+  mutate(time_of_the_day = case_when(hours &lt; 12 ~ &quot;Morning&quot;,
+                                    TRUE  ~ &quot;Evening&quot;)) %&gt;% 
+  ggplot(aes(x = DaysLeft, y = Price)) + 
+  theme(legend.position = &quot;none&quot;, axis.text = element_text(size=12), axis.title.x = element_text(size = 14), axis.title.y = element_text(size = 14), strip.text = element_text(size = 12))+
+  geom_point(aes(color = time_of_the_day)) + 
+  facet_wrap(time_of_the_day ~ departure_wday.lbl, ncol = 7)  +
+  scale_x_reverse() +
+  scale_color_manual(values = c(&quot;#0e3d8f&quot;,&quot;#F4CA35&quot;)) +
+  theme_minimal()</code></pre>
+<p><img src="explore_files/figure-html/Price_trend_per_time_of_the_day_wday,%20a_taller_figure-1.png" width="672" /></p>
+</div>
+<div id="price-trend-three-weeks-before-a-flight" class="section level4">
+<h4>Price trend three weeks before a flight</h4>
+<pre class="r"><code>  csv_tbl_unnested %&gt;% 
+  filter(DaysLeft &lt;= 21) %&gt;% 
+  
+  mutate(hours = links_flight_departure %&gt;% hour()) %&gt;%
+  mutate(time_of_the_day = case_when(hours &lt; 12 ~ &quot;Morning&quot;,
+                                    TRUE  ~ &quot;Evening&quot;)) %&gt;% 
+  ggplot(aes(x = DaysLeft, y = Price)) + 
+  theme(legend.position = &quot;none&quot;, axis.text = element_text(size=12), axis.title.x = element_text(size = 14), axis.title.y = element_text(size = 14), strip.text = element_text(size = 12))+
+  geom_point(aes(color = time_of_the_day)) + 
+  facet_wrap( time_of_the_day ~ departure_wday.lbl, ncol = 7)  +
+  scale_x_reverse() +
+  scale_color_manual(values = c(&quot;#0e3d8f&quot;,&quot;#F4CA35&quot;)) +
+  theme_minimal()</code></pre>
+<p><img src="explore_files/figure-html/Price_trend_per_time_of_the_day_wday_21,%20a_taller_figure-1.png" width="672" /></p>
+</div>
+<div id="price-trend-per-booking-time" class="section level4">
+<h4>Price trend per booking time</h4>
+<p>If somebody would check constantly couple of flight tickets on the Ryanair website, he or she would notice prices for these tickets are changing constantly, some of them are increasing in a value and some are decreasing. For this reason it is important to check this assumption and to check a correlation between price and request time first. The data was collected every day at 11 a.m. and 23 p.m.</p>
+<p>Viewing the graph it can be concluded that there isn’t any obvious difference in price trend between buying a ticket in the morning or in the evening. Median and mean prices look very similar by both request hours.</p>
+<p><em>On the histogram below <strong>blue</strong> dashed line identifies median price.</em> <br/> <em><strong>Yellow</strong> dashed line shows the mean price.</em></p>
+<pre class="r"><code>  csv_tbl_unnested %&gt;% 
+  ggplot(aes(x = DaysLeft, y = Price)) + 
+  geom_point(color=&quot;#142039&quot;) + 
+  facet_wrap( ~ request_hours) +
+  theme(axis.text = element_text(size=16), axis.title.x = element_text(size = 18), axis.title.y = element_text(size = 18), strip.text = element_text(size = 20)) +
+  geom_vline(aes(xintercept = mean(Price)), color = &quot;#F4CA35&quot;, linetype = &quot;dashed&quot;, size = 1.2) +
+  geom_vline(aes(xintercept = median(Price)), color = &quot;#0e3d8f&quot;, linetype = &quot;dashed&quot;, size = 1.2) +
+  scale_x_reverse() +
+  theme_minimal()</code></pre>
+<p><img src="explore_files/figure-html/price_trend_per_booking_hour,%20a_taller_figure-1.png" width="672" /></p>
+</div>
+<div id="price-trend-per-booking-day" class="section level4">
+<h4>Price trend per booking day</h4>
+<pre class="r"><code>csv_tbl_unnested$request_wday.lbl &lt;- factor(csv_tbl_unnested$request_wday.lbl,
+                           labels = c(&quot;Sunday&quot;,&quot;Monday&quot;, &quot;Tuesday&quot;, &quot;Wednesday&quot;, &quot;Thursday&quot;, &quot;Friday&quot;, &quot;Saturday&quot; ))
+csv_tbl_unnested %&gt;% 
+  ggplot(aes(x = request_wday.lbl, y = Price, colour = request_hours)) + 
+  geom_boxplot() + 
+  theme(axis.text = element_text(size=12), axis.title.x = element_text(size = 14), axis.title.y = element_text(size = 14), strip.text = element_text(size = 12)) +
+  scale_color_manual(values = c(&quot;#F4CA35&quot;,&quot;#0e3d8f&quot;)) +
+  theme_minimal()</code></pre>
+<p><img src="explore_files/figure-html/price_trend_per_booking_day,%20a_taller_figure-1.png" width="672" /></p>
+</div>
+<div id="price-trend-for-randomly-selected-flights" class="section level4">
+<h4>Price trend for randomly selected flights</h4>
+<p>Ryanair changes flight prices often and most of the time it is difficult to find the logic behind its changes, for example, the price in the evening can be extremely expensive, but the next day morning it can be unbelievably cheap.</p>
+<p>In this section four flights were filtered as an example to show the differences between current and previous price and in general price fluctuations. Two flights from STN-SXF route and two from SXF-STN route were chosen, the main requirement was to choose one evening flight and one next day morning flight, also was important to select two identical flights from the opposite route, so it can possibly be seen if the price changes are connected somehow to each other.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Flight_unique_id</th>
+<th>Flight Number</th>
+<th>Departure Time</th>
+<th>Date</th>
+<th>Route</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2019-07-18 FR 147</td>
+<td>FR 147</td>
+<td>19:20:00</td>
+<td>Thu 18th of July</td>
+<td>London-Berlin</td>
+</tr>
+<tr class="even">
+<td>2019-07-18 FR 8542</td>
+<td>FR 8542</td>
+<td>06:30:00</td>
+<td>Fri 19th of July</td>
+<td>London-Berlin</td>
+</tr>
+<tr class="odd">
+<td>2019-07-18 FR 8545</td>
+<td>FR 8545</td>
+<td>22:25:00</td>
+<td>Thu 18th of July</td>
+<td>Berlin-London</td>
+</tr>
+<tr class="even">
+<td>2019-07-19 FR 144</td>
+<td>FR 144</td>
+<td>06:30:00</td>
+<td>Fri 19th of July</td>
+<td>Berlin-London</td>
+</tr>
+</tbody>
+</table>
+<p>Some clear price patterns weren’t found from the plot below, due to the wrong chosen random flights or probably there is no pattern and only accidental dynamic changes.</p>
+<p><em>The <strong>dark blue</strong> and <strong>yellow</strong> colored lines identify <strong>evening</strong> and <strong>morning</strong> flights from London to Berlin, <strong>light blue</strong> and <strong>orange</strong> colored lines identify an <strong>evening</strong> and <strong>morning</strong> flights from Berlin to London.</em></p>
+<pre class="r"><code>csv_tbl_unnested  %&gt;%
+    filter(flight_unique_id== c(&quot;2019-07-18 FR 147&quot;, &quot;2019-07-19 FR 8542&quot;, &quot;2019-07-18 FR 8545&quot;, &quot;2019-07-19 FR 144&quot;)) %&gt;%
+  ggplot(aes(x=DaysLeft, y=Price)) +
+  geom_line(aes(color = flight_unique_id), size = 1.3) +
+    scale_color_manual(values = c(&quot;#0e3d8f&quot;,&quot;#2091eb&quot;,&quot;#ffa409&quot;,&quot;#F4CA35&quot;))+
+       theme(axis.text = element_text(size=12), axis.title.x = element_text(size = 14), axis.title.y = element_text(size = 14), strip.text = element_text(size = 12))+
+  scale_x_reverse() + 
+  theme_minimal()</code></pre>
+<p><img src="explore_files/figure-html/price_trend_random,%20a_taller_figure-1.png" width="672" /></p>
+<p>The same flights were also selected to demonstrate the pattern behind the current price and previous price difference, there was a possibility it would help to see the logic behind price changes.</p>
+<p>The line graph doesn’t give any consistent pattern as well.</p>
+<pre class="r"><code>  csv_tbl_unnested  %&gt;%
+filter(flight_unique_id== c(&quot;2019-07-18 FR 147&quot;, &quot;2019-07-19 FR 8542&quot;, &quot;2019-07-18 FR 8545&quot;, &quot;2019-07-19 FR 144&quot;)) %&gt;%
+ggplot(aes(x=DaysLeft, y= difference_previous_price)) +
+  geom_line(aes(color = flight_unique_id), size = 1.3) +
+   theme(axis.text = element_text(size=12), axis.title.x = element_text(size = 14), axis.title.y = element_text(size = 14), strip.text = element_text(size = 12)) +
+    scale_color_manual(values = c(&quot;#0e3d8f&quot;,&quot;#2091eb&quot;,&quot;#ffa409&quot;,&quot;#F4CA35&quot;)) +
+  scale_x_reverse() +
+  theme_minimal()</code></pre>
+<p><img src="explore_files/figure-html/price_diff_random,%20a_taller_figure-1.png" width="672" /></p>
+</div>
+<div id="price-trend-for-a-random-flight" class="section level4">
+<h4>Price trend for a random flight</h4>
+<pre class="r"><code> csv_tbl_unnested %&gt;% 
+  filter(flight_unique_id == &quot;2019-08-05 FR 8545&quot;) %&gt;%
+  ggplot(aes(x=DaysLeft, y=Price)) +
+  geom_line(aes(color= flight_unique_id), size = 1.3) +
+  scale_color_manual(values = c(&quot;#0e3d8f&quot;))+
+  theme(legend.position = &quot;none&quot;, axis.text = element_text(size=16), axis.title.x = element_text(size = 18), axis.title.y = element_text(size = 18), strip.text = element_text(size = 20)) +
+  scale_x_reverse() +
+  theme_minimal()</code></pre>
+<p><img src="explore_files/figure-html/price_trend_random_flight,%20a_taller_figure-1.png" width="672" /></p>
+</div>
+</div>
+<div id="conclusion" class="section level3">
+<h3>Conclusion</h3>
+<p>During the visualization analysis it was observed, that the variable DaysLeft describing amount of days left till a departure day and the Price variable have a negative correlation, less days are left till the flight, more expensive the plane tickets cost.</p>
+<p>The variable DaysLeft is one of the most important variables and it will be used for the prediction model.</p>
+<p>Plots showed a correlation between the day of a flight and the price, as well as the time of the day of the flight and the price. Price depends on the time of the day and the day of the week, since there is a different demand depending on the weekday.</p>
+<p>The correlation between price and request time and date couldn’t be shown clearly, but these variables are very important in further modeling, as well as the variables demonstrating the difference between the previous price and current price.</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
