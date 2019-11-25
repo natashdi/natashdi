@@ -2,4 +2,13 @@
 title: "Home"
 ---
 
-Welcome!
+Hello!
+
+My name is Natalia Dikaya and welcome to my Data Science Portfolio. Here I decided to publish my Data Science related projects.
+
+Among them are:
+
+* An exploration part of the master thesis 
+* Kaggle Project "San Francisco Crime Category"
+
+The Portfolio is quiet new and still under development.

@@ -16,7 +16,7 @@
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -104,33 +104,33 @@ summary {
 <style type="text/css">
 /* padding for bootstrap navbar */
 body {
-  padding-top: 51px;
+  padding-top: 60px;
   padding-bottom: 40px;
 }
 /* offset scroll position for anchor links (for fixed navbar)  */
 .section h1 {
-  padding-top: 56px;
-  margin-top: -56px;
+  padding-top: 65px;
+  margin-top: -65px;
 }
 .section h2 {
-  padding-top: 56px;
-  margin-top: -56px;
+  padding-top: 65px;
+  margin-top: -65px;
 }
 .section h3 {
-  padding-top: 56px;
-  margin-top: -56px;
+  padding-top: 65px;
+  margin-top: -65px;
 }
 .section h4 {
-  padding-top: 56px;
-  margin-top: -56px;
+  padding-top: 65px;
+  margin-top: -65px;
 }
 .section h5 {
-  padding-top: 56px;
-  margin-top: -56px;
+  padding-top: 65px;
+  margin-top: -65px;
 }
 .section h6 {
-  padding-top: 56px;
-  margin-top: -56px;
+  padding-top: 65px;
+  margin-top: -65px;
 }
 .dropdown-submenu {
   position: relative;
@@ -278,6 +278,9 @@ $(document).ready(function () {
 <li>
   <a href="explore.html">Flight Data Exploration</a>
 </li>
+<li>
+  <a href="sfc.html">San Francisco Crime</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -325,7 +328,6 @@ library(Hmisc)
 library(xgboost)
 library(DMwR)
 library(hrbrthemes)
-library(tidyquant)
 
 set.seed(1)
 
@@ -473,16 +475,17 @@ csv_tbl_unnested &lt;- csv_tbl_unnested %&gt;%
   rename(request_mweek = mweek) %&gt;% 
   bind_cols(csv_tbl_unnested) </code></pre>
 <div id="data-exploration" class="section level3">
-<h3>Data Exploration</h3>
+<h3><strong>Data Exploration</strong></h3>
 <div id="summary-of-the-data-and-unique-values" class="section level4">
-<h4>Summary of the data and unique values</h4>
+<h4><strong>Summary of the data and unique values</strong></h4>
 <p>During data exploration original eight variables were checked for unique values. There are four routes in the data: FRA-STN, STN-FRA, STN-SXF, SXF-STN. In total there are 12 different flight numbers. Three origin and three destination air- port names: Frankfurt International, London Stansted and Berlin Schönefeld. Price is described by two types of currency, euro and pound.</p>
 <pre class="r"><code># Structure of the dataset ----
 csv_tbl_unnested %&gt;%
   head() %&gt;%
   knitr::kable() %&gt;%
-  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;,&quot;responsive&quot;))</code></pre>
-<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;,&quot;responsive&quot;),
+                full_width = FALSE) </code></pre>
+<table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
 <th style="text-align:right;">
@@ -1375,7 +1378,7 @@ csv_tbl_unnested %&gt;%
 ## [1] &quot;€&quot; &quot;£&quot;</code></pre>
 </div>
 <div id="split-of-the-flights-by-day-of-the-week" class="section level4">
-<h4>Split of the flights by day of the week</h4>
+<h4><strong>Split of the flights by day of the week</strong></h4>
 <p>The table below shows that there are less flights on Wednesday, Saturday and Sunday, since there are less flights scheduled on these days.</p>
 <pre class="r"><code>csv_tbl_unnested %&gt;% 
   select(departure_wday.lbl) %&gt;% table() %&gt;% 
@@ -1385,7 +1388,7 @@ csv_tbl_unnested %&gt;%
 ## 0.1290257 0.1594942 0.1522302 0.1266380 0.1507169 0.1525441 0.1293508</code></pre>
 </div>
 <div id="split-of-the-flights-by-hour-of-the-flight" class="section level4">
-<h4>Split of the flights by hour of the flight</h4>
+<h4><strong>Split of the flights by hour of the flight</strong></h4>
 <p>The generated table demonstrates the amount of distributed flights between morning and evening almost equally.</p>
 <pre class="r"><code>csv_tbl_unnested %&gt;% 
   mutate(links_flight_departure = links_flight_departure %&gt;% hour()) %&gt;% 
@@ -1399,7 +1402,7 @@ csv_tbl_unnested %&gt;%
 ## 0.240788279 0.012308451 0.078188931</code></pre>
 </div>
 <div id="price-summary-of-the-price-in-euros-for-flights-from-germany-to-london" class="section level4">
-<h4>Price: Summary of the price in euros for flights from Germany to London</h4>
+<h4><strong>Price: summary of the price in euros for flights from Germany to London</strong></h4>
 <pre class="r"><code>csv_tbl_unnested %&gt;% 
  filter(Currency == &quot;€&quot;) %&gt;% 
  select(Price) %&gt;%
@@ -1462,7 +1465,7 @@ Max. :311.09
 </table>
 </div>
 <div id="price-summary-of-the-price-in-pounds-for-flights-from-london-to-germany" class="section level4">
-<h4>Price: Summary of the price in pounds for flights from London to Germany</h4>
+<h4><strong>Price: summary of the price in pounds for flights from London to Germany</strong></h4>
 <pre class="r"><code>csv_tbl_unnested %&gt;% 
  filter(Currency == &quot;£&quot;) %&gt;% 
  select(Price) %&gt;%
@@ -1526,10 +1529,10 @@ Max. :334.87
 </div>
 </div>
 <div id="visualization" class="section level3">
-<h3>Visualization</h3>
+<h3><strong>Visualization</strong></h3>
 <p>Once all the data had been collected and preprocessed, a data visualization step helps to understand the dataset, existent trends, correlations between variables, outliers and others. It is important to learn the data on a deeper level.</p>
 <div id="frequency-of-the-different-prices" class="section level5">
-<h5>Frequency of the different prices</h5>
+<h5><strong>Frequency of the different prices</strong></h5>
 <p>In this part of the data exploration we checked the information of an important variable <strong>Price</strong>. The histogramm shows us that most of the tickets are being sold in the following price range: 29,37-88,73 pounds and 33,45-88,73 euros. The most common price for a ticket for the flights from London is 52,01 pounds and for flights from Germany is 55,07 euros. It was also found out, that the minimum price for the routes from London is 9,99 pounds and maximum price is 334,87 pounds, minimum price for routes to London is 8,99 euros and maximum price is 315,09 euros.</p>
 <p><em>On the histogram below <strong>blue</strong> dashed line identifies median price.</em> <br/> <em><strong>Yellow</strong> dashed line shows the mean price.</em></p>
 <pre class="r"><code>csv_tbl_unnested %&gt;% 
@@ -1543,7 +1546,7 @@ Max. :334.87
 <p><img src="explore_files/figure-html/Price_Variable,%20a_taller_figure-1.png" width="672" /></p>
 </div>
 <div id="price-trend-in-general-per-route" class="section level4">
-<h4>Price trend in general per route</h4>
+<h4><strong>Price trend in general per route</strong></h4>
 <p>Generally there is an inverse relationship between the flight price and days before the flight, by decreasing the number of the days the price tends to increase. This result is quite logical, most of the people try to buy a flight ticket in advance.</p>
 <p>Furthermore price for flight tickets from Berlin to London tends to increase rapidly much sooner comparing to other routes, around three months in advance. Price for other routes starts to rise later, two or two and a half months before a departure date. Tickets for the route from London to Frankfurt stays quiet cheap for the longest time among the routes and become expensive around 25 days before a flight.</p>
 <pre class="r"><code>csv_tbl_unnested %&gt;% 
@@ -1557,7 +1560,7 @@ geom_point(aes(color = Route)) +
 <p><img src="explore_files/figure-html/Price_trend_in_general,%20a_taller_figure-1.png" width="672" /></p>
 </div>
 <div id="price-trend-per-route-and-per-weekday" class="section level4">
-<h4>Price trend per route and per weekday</h4>
+<h4><strong>Price trend per route and per weekday</strong></h4>
 <p>The next plot demonstrates that Sunday is the most popular travel day, for a possible reason a lot of people tend to fly back from their holidays or for business purposes on this day, so they can avoid stress travelling on the first working day – Monday.</p>
 <p>It can be also assumed that the reason for tickets being in a high demand for the weekend is due to the amount of flights scheduled on Saturday and Sunday. On the routes from London to Berlin and from Berlin to London there are only three flights scheduled on Saturday, Sunday and Wednesday, while on other days four flights are scheduled during the day on these routes. Routes Frankfurt-Berlin and Berlin-Frankfurt have consistently two flights per each weekday.</p>
 <pre class="r"><code>csv_tbl_unnested$departure_wday.lbl &lt;- factor(csv_tbl_unnested$departure_wday.lbl,
@@ -1573,7 +1576,7 @@ csv_tbl_unnested %&gt;%
 <p><img src="explore_files/figure-html/Price_trend_per_weekday,%20a_taller_figure-1.png" width="672" /></p>
 </div>
 <div id="flight-ptice-trend-per-time-of-the-day" class="section level4">
-<h4>Flight ptice trend per time of the day</h4>
+<h4><strong>Flight ptice trend per time of the day</strong></h4>
 <p>It can be immediately noticed that plane tickets are in general more expensive when a flight is scheduled in the evening than in the morning. Prices start to increase earlier for evening flights than for morning.</p>
 <pre class="r"><code>csv_tbl_unnested %&gt;% 
   mutate(hours = links_flight_departure %&gt;% hour()) %&gt;% 
@@ -1589,7 +1592,7 @@ csv_tbl_unnested %&gt;%
 <p><img src="explore_files/figure-html/Price_trend_per_time_of_the_day,%20a_taller_figure-1.png" width="672" /></p>
 </div>
 <div id="flight-ptice-trend-per-time-of-the-day-and-a-week-day" class="section level4">
-<h4>Flight ptice trend per time of the day and a week day</h4>
+<h4><strong>Flight ptice trend per time of the day and a week day</strong></h4>
 <p>Sunday evening is the most popular time during the week to travel, since a lot of tourists fly back home or workers for business trips in the evening, trying to avoid stressful travelling on the Monday morning. Although some people still prefer to travel on Monday morning, due to the possibility to rest the whole weekend home or to spend the whole weekend travelling.</p>
 <p>It was also learned from the plot that quite popular time to fly is the Monday evening. To fly on Friday morning and evening is common as well, a lot of people travel after work or university for the weekend in a different city or fly home.</p>
 <pre class="r"><code>csv_tbl_unnested %&gt;% 
@@ -1606,7 +1609,7 @@ csv_tbl_unnested %&gt;%
 <p><img src="explore_files/figure-html/Price_trend_per_time_of_the_day_wday,%20a_taller_figure-1.png" width="672" /></p>
 </div>
 <div id="price-trend-three-weeks-before-a-flight" class="section level4">
-<h4>Price trend three weeks before a flight</h4>
+<h4><strong>Price trend three weeks before a flight</strong></h4>
 <pre class="r"><code>  csv_tbl_unnested %&gt;% 
   filter(DaysLeft &lt;= 21) %&gt;% 
   
@@ -1623,7 +1626,7 @@ csv_tbl_unnested %&gt;%
 <p><img src="explore_files/figure-html/Price_trend_per_time_of_the_day_wday_21,%20a_taller_figure-1.png" width="672" /></p>
 </div>
 <div id="price-trend-per-booking-time" class="section level4">
-<h4>Price trend per booking time</h4>
+<h4><strong>Price trend per booking time</strong></h4>
 <p>If somebody would check constantly couple of flight tickets on the Ryanair website, he or she would notice prices for these tickets are changing constantly, some of them are increasing in a value and some are decreasing. For this reason it is important to check this assumption and to check a correlation between price and request time first. The data was collected every day at 11 a.m. and 23 p.m.</p>
 <p>Viewing the graph it can be concluded that there isn’t any obvious difference in price trend between buying a ticket in the morning or in the evening. Median and mean prices look very similar by both request hours.</p>
 <p><em>On the histogram below <strong>blue</strong> dashed line identifies median price.</em> <br/> <em><strong>Yellow</strong> dashed line shows the mean price.</em></p>
@@ -1639,7 +1642,7 @@ csv_tbl_unnested %&gt;%
 <p><img src="explore_files/figure-html/price_trend_per_booking_hour,%20a_taller_figure-1.png" width="672" /></p>
 </div>
 <div id="price-trend-per-booking-day" class="section level4">
-<h4>Price trend per booking day</h4>
+<h4><strong>Price trend per booking day</strong></h4>
 <pre class="r"><code>csv_tbl_unnested$request_wday.lbl &lt;- factor(csv_tbl_unnested$request_wday.lbl,
                            labels = c(&quot;Sunday&quot;,&quot;Monday&quot;, &quot;Tuesday&quot;, &quot;Wednesday&quot;, &quot;Thursday&quot;, &quot;Friday&quot;, &quot;Saturday&quot; ))
 csv_tbl_unnested %&gt;% 
@@ -1651,17 +1654,17 @@ csv_tbl_unnested %&gt;%
 <p><img src="explore_files/figure-html/price_trend_per_booking_day,%20a_taller_figure-1.png" width="672" /></p>
 </div>
 <div id="price-trend-for-randomly-selected-flights" class="section level4">
-<h4>Price trend for randomly selected flights</h4>
+<h4><strong>Price trend for randomly selected flights</strong></h4>
 <p>Ryanair changes flight prices often and most of the time it is difficult to find the logic behind its changes, for example, the price in the evening can be extremely expensive, but the next day morning it can be unbelievably cheap.</p>
 <p>In this section four flights were filtered as an example to show the differences between current and previous price and in general price fluctuations. Two flights from STN-SXF route and two from SXF-STN route were chosen, the main requirement was to choose one evening flight and one next day morning flight, also was important to select two identical flights from the opposite route, so it can possibly be seen if the price changes are connected somehow to each other.</p>
 <table>
 <thead>
 <tr class="header">
-<th>Flight_unique_id</th>
-<th>Flight Number</th>
-<th>Departure Time</th>
-<th>Date</th>
-<th>Route</th>
+<th><strong>Flight_unique_id</strong></th>
+<th><strong>Flight Number</strong></th>
+<th><strong>Departure Time</strong></th>
+<th><strong>Date</strong></th>
+<th><strong>Route</strong></th>
 </tr>
 </thead>
 <tbody>
@@ -1719,7 +1722,7 @@ ggplot(aes(x=DaysLeft, y= difference_previous_price)) +
 <p><img src="explore_files/figure-html/price_diff_random,%20a_taller_figure-1.png" width="672" /></p>
 </div>
 <div id="price-trend-for-a-random-flight" class="section level4">
-<h4>Price trend for a random flight</h4>
+<h4><strong>Price trend for a random flight</strong></h4>
 <pre class="r"><code> csv_tbl_unnested %&gt;% 
   filter(flight_unique_id == &quot;2019-08-05 FR 8545&quot;) %&gt;%
   ggplot(aes(x=DaysLeft, y=Price)) +
@@ -1732,7 +1735,7 @@ ggplot(aes(x=DaysLeft, y= difference_previous_price)) +
 </div>
 </div>
 <div id="conclusion" class="section level3">
-<h3>Conclusion</h3>
+<h3><strong>Conclusion</strong></h3>
 <p>During the visualization analysis it was observed, that the variable DaysLeft describing amount of days left till a departure day and the Price variable have a negative correlation, less days are left till the flight, more expensive the plane tickets cost.</p>
 <p>The variable DaysLeft is one of the most important variables and it will be used for the prediction model.</p>
 <p>Plots showed a correlation between the day of a flight and the price, as well as the time of the day of the flight and the price. Price depends on the time of the day and the day of the week, since there is a different demand depending on the weekday.</p>

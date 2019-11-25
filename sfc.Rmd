@@ -1,0 +1,235 @@
+---
+title: "San Francisco Crime"
+---
+
+In this Kaggle competition the category of crime that occurred in San Francisco was predicted. 
+It was my first Data Science related project during my studies, which I used to understand the steps that should be taken to solve a prediction task. 
+
+Here it can be found a visualization part of the project.
+
+All of the data was used from the Kaggle website.
+
+Firstly, necessary packages for the project were imported:
+
+```{r Loading, a_taller_figure, message = FALSE, echo = TRUE, warning=FALSE, results='hide'}
+
+library(ggplot2)
+library(vcd)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(scales)
+library(ggmap)
+library(caret)
+library(randomForest)
+library(data.table)
+library(e1071)
+library(LiblineaR)
+library(knitr)
+library(formatR)
+library(kableExtra)
+
+```
+
+### **Training Data preparation**
+
+Loading data and checking the structure, the number of dimensions, names of variables and the summary of the training data:
+```{r dataset_summary, a_taller_figure, message = FALSE, warning=FALSE, results='show'}
+# Import data
+
+train <- read.csv("/Users/natadi/Documents/San Francisco Crime/train.csv")
+
+# Training dataset summary
+train %>%
+  head() %>%
+  knitr::kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover","responsive")) 
+
+dim(train)
+names(train)
+
+```
+
+#### **Missing values**
+
+```{r missing_values, a_taller_figure, message = FALSE, warning=FALSE, results='show'}
+sum(is.null(train))
+sum(is.na(train))
+```
+
+Splitting the column **Dates** from the training set in two columns: **Date** and **Time**.
+
+Creating additional variables **Year**, **Month** and **Hour** to make it easier to visualize, analyse data and build prediction models.
+
+```{r dates_proc, a_taller_figure, message = FALSE, warning=FALSE, results='show'}
+# "Dates" column split
+train <- separate(train, Dates, c("Date", "Time"), sep =" ", remove = TRUE)
+
+# New variables creation
+train$Year <- as.factor(year(strptime(train$Date, "%Y-%m-%d")))
+train$Month <- as.factor(month(strptime(train$Date, "%Y-%m-%d")))
+train$Hour <- as.factor(hour(strptime(train$Time,"%H:%M:%S")))
+str(train) 
+
+```
+
+
+### **Data Visualization**
+
+#### **Frequency of Crimes in San Francisco**
+
+The histogram shows the most occured categories of crimes are: "Larceny/Theft", "Other Offences", "Non-Criminal", "Assault", "Vehicle Theft", "Drug/Narcotic", "Warrants", "Vandalism", "Burglary", "Suspicious Occ","Robbery" and "Fraud". 
+
+It can be concluded that these categories appeared in around of 80% of all events.
+
+```{r freq_hist, a_taller_figure, message = FALSE, warning=FALSE, results='show'}
+ggplot(data = train,aes(x = Category)) +  
+    geom_bar(fill = "steelblue3") +
+  ggtitle("Frequency of Crimes in San Francisco") +
+  xlab("")+
+  ylab("Count") +
+  coord_flip() +
+  theme(
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 8),
+    legend.position = "None",
+    panel.background = element_rect(fill = "white"), 
+    panel.grid.major = element_line(colour = "grey90"),
+    axis.line = element_line(size = 0.4, linetype = "solid")) +
+   scale_y_continuous(labels = scales::comma) 
+
+```
+
+#### **Number of Crimes by a weekday**
+
+This histogram demonstrates that on days as Friday, Wednesday and Saturday the most crimes took a part:
+
+```{r wd_freq_hist, a_taller_figure, message = FALSE, warning=FALSE, results='show'}
+DOW <- count(train, DayOfWeek)
+summary(train$DayOfWeek)
+DOW$DayOfWeek <- factor(DOW$DayOfWeek, levels = c("Monday", "Tuesday", "Wednesday", 
+                                                 "Thursday", "Friday", "Saturday", "Sunday"))
+
+ggplot(DOW, aes(x = reorder(DayOfWeek,-n), y = n, fill = n)) +  
+  geom_bar(
+      stat = "identity", 
+      width = 0.9,
+      color = "slategray") +
+  geom_text(
+    aes(label= n),
+    color="black", 
+    vjust=1.6, 
+    size=3.5) +
+  scale_fill_gradient(
+     low="steelblue1", high="steelblue4") +
+  theme(
+    legend.position = "None",
+    panel.background = element_rect(fill = "white"), 
+    panel.grid.major = element_line(colour = "grey90"),
+    axis.line = element_line(size = 0.4, linetype = "solid"),
+    axis.text.x = element_text(size=11),
+    axis.text.y = element_text(size = 10)) +
+   scale_y_continuous(labels = comma) +
+  ggtitle("Number of crimes by a day of week") +
+  xlab("")+
+  ylab("Count") 
+```
+
+#### **Number of Crimes per a district**
+
+The graph shows that the most dangerous districts are "Southern", "Mission" and "Northern".
+
+```{r distr_freq_hist, a_taller_figure, message = FALSE, warning=FALSE, results='show'}
+
+distr <- count(train, PdDistrict)
+head(distr)
+levels(train$PdDistrict)
+ggplot(distr, aes(x = reorder(PdDistrict,-n), y = n, fill = n)) +  
+    geom_bar(
+      stat = "identity", 
+      width = 0.9) +
+  scale_fill_gradient(low="steelblue1", high="steelblue4") +
+  theme(
+    axis.text.x = element_text(
+      angle = 65,
+      vjust = 0.5,
+      size=11),
+    axis.text.y = element_text(size = 10),
+    legend.position = "None",
+    panel.background = element_rect(fill = "white"), 
+    panel.grid.major = element_line(colour = "grey90"),
+    axis.line = element_line
+    (size = 0.4, linetype = "solid")) +
+   scale_y_continuous(labels = scales::comma)+
+   geom_text(
+    aes(label= n),
+    color="black", 
+    vjust=1.6, 
+    size=3.5) + 
+  ggtitle("Number of crimes in different districts") +
+  xlab("")+
+  ylab("Count")
+
+```
+
+#### **Time graphs**
+
+The most crimes were comitted in 2013.
+
+```{r year_hist, a_taller_figure, message = FALSE, warning=FALSE, results='show'}
+ggplot(data=train, aes(x=Year)) +
+  geom_bar(colour="black", fill="steelblue2") +
+  ylab("Count") +
+  xlab("") +
+  ggtitle("Number of Crimes in a Year") +
+  theme(
+    axis.text.x = element_text(size = 11),
+    axis.text.y = element_text(size = 10),
+    legend.position = "None",
+    panel.background = element_rect(fill = "white"), 
+    panel.grid.major = element_line(colour = "grey90"),
+    axis.line = element_line(size = 0.4, linetype = "solid")) +
+   scale_y_continuous(labels = scales::comma)
+
+```
+
+
+Crimes tend to happen at 12 am, between 4 pm and 7 pm and in the midnight.
+
+```{r hour_hist, a_taller_figure, message = FALSE, warning=FALSE, results='show'}
+ggplot(data=train, aes(x=Hour)) +
+  geom_bar(colour="black", fill="steelblue2") +
+  ylab("Count")+
+  xlab("") +
+  ggtitle("Number of Crimes in an Hour") +
+  theme(
+    axis.text.x = element_text(size = 11),
+    axis.text.y = element_text(size = 10),
+    legend.position = "None",
+    panel.background = element_rect(fill = "white"), 
+    panel.grid.major = element_line(colour = "grey90"),
+    axis.line = element_line(size = 0.4, linetype = "solid")) +
+   scale_y_continuous(labels = scales::comma)
+
+```
+
+
+The graph below shows that in spring months and in October crimes occured the most. 
+
+```{r month_hist, a_taller_figure, message = FALSE, warning=FALSE, results='show'}
+ggplot(data=train, aes(x=Month)) +
+  geom_bar(colour="black", fill="steelblue2") +
+  ylab("Count") +
+  xlab("") +
+  ggtitle("Number of Crimes in a Month") +
+  theme(
+    axis.text.x = element_text(size = 11),
+    axis.text.y = element_text(size = 10),
+    legend.position = "None",
+    panel.background = element_rect(fill = "white"), 
+    panel.grid.major = element_line(colour = "grey90"),
+    axis.line = element_line(size = 0.4, linetype = "solid")) +
+   scale_y_continuous(labels = scales::comma)
+
+```
+

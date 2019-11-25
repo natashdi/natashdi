@@ -35,7 +35,6 @@ library(Hmisc)
 library(xgboost)
 library(DMwR)
 library(hrbrthemes)
-library(tidyquant)
 
 set.seed(1)
 
@@ -185,10 +184,10 @@ csv_tbl_unnested <- csv_tbl_unnested %>%
 ```
 
 
-### Data Exploration 
+### **Data Exploration** 
 
 
-#### Summary of the data and unique values
+#### **Summary of the data and unique values**
 
 
 During data exploration original eight variables were checked for unique values. There are four routes in the data: FRA-STN, STN-FRA, STN-SXF, SXF-STN. In total there are 12 different flight numbers. Three origin and three destination air- port names: Frankfurt International, London Stansted and Berlin Schönefeld. Price is described by two types of currency, euro and pound.
@@ -198,7 +197,8 @@ During data exploration original eight variables were checked for unique values.
 csv_tbl_unnested %>%
   head() %>%
   knitr::kable() %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed","responsive"))
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed","responsive"),
+                full_width = FALSE) 
 
 csv_tbl_unnested %>% dim() 
 
@@ -214,7 +214,7 @@ csv_tbl_unnested %>%
 
 
 
-#### Split of the flights by day of the week
+#### **Split of the flights by day of the week**
 
 
 The table below shows that there are less flights on Wednesday, Saturday and Sunday, since there are less flights scheduled on these days. 
@@ -228,7 +228,7 @@ csv_tbl_unnested %>%
 
 
 
-#### Split of the flights by hour of the flight
+#### **Split of the flights by hour of the flight**
 
 
 The generated table demonstrates the amount of distributed flights between morning and evening almost equally. 
@@ -246,7 +246,7 @@ csv_tbl_unnested %>%
 
 
 
-#### Price: Summary of the price in euros for flights from Germany to London
+#### **Price: summary of the price in euros for flights from Germany to London**
 
 
 ```{r Price_euro, a_taller_figure, message = FALSE, warning=FALSE, results='show'}
@@ -260,7 +260,7 @@ csv_tbl_unnested %>%
 
 
 
-#### Price: Summary of the price in pounds for flights from London to Germany 
+#### **Price: summary of the price in pounds for flights from London to Germany** 
 
 
 ```{r Price_pound, a_taller_figure, message = FALSE, warning=FALSE, results='show'}
@@ -273,14 +273,14 @@ csv_tbl_unnested %>%
 
 
 
-### Visualization
+### **Visualization**
 
 
 Once all the data had been collected and preprocessed, a data visualization step helps to understand the dataset, existent trends, correlations between variables, outliers and others. It is important to learn the data on a deeper level.
 
 
 
-##### Frequency of the different prices
+##### **Frequency of the different prices**
 
 
 In this part of the data exploration we checked the information of an important variable **Price**. The histogramm shows us that most of the tickets are being sold in the following price range: 29,37-88,73 pounds and 33,45-88,73 euros. The most common price for a ticket for the flights from London is 52,01 pounds and for flights from Germany is 55,07 euros. It was also found out, that the minimum price for the routes from London is 9,99 pounds and maximum price is 334,87 pounds, minimum price for routes to London is 8,99 euros and maximum price is 315,09 euros.
@@ -303,7 +303,7 @@ csv_tbl_unnested %>%
 
 
 
-#### Price trend in general per route
+#### **Price trend in general per route**
 
 
 Generally there is an inverse relationship between the flight price and days before the flight, by decreasing the number of the days the price tends to increase. This result is quite logical, most of the people try to buy a flight ticket in advance. 
@@ -324,7 +324,7 @@ geom_point(aes(color = Route)) +
 
 
 
-#### Price trend per route and per weekday
+#### **Price trend per route and per weekday**
 
 
 The next plot demonstrates that Sunday is the most popular travel day, for a possible reason  a lot of people tend to fly back from their holidays or for business purposes on this day, so they can avoid stress travelling on the first working day – Monday.
@@ -347,7 +347,7 @@ csv_tbl_unnested %>%
 
 
 
-#### Flight ptice trend per time of the day
+#### **Flight ptice trend per time of the day**
 
 
 It can be immediately noticed that plane tickets are in general more expensive when a flight is scheduled in the evening than in the morning. Prices start to increase earlier for evening flights than for morning.
@@ -369,7 +369,7 @@ csv_tbl_unnested %>%
 
 
 
-#### Flight ptice trend per time of the day and a week day
+#### **Flight ptice trend per time of the day and a week day**
 
 
 Sunday evening is the most popular time during the week to travel, since a lot of tourists fly back home or workers for business trips in the evening, trying to avoid stressful travelling on the Monday morning. Although some people still prefer to travel on Monday morning, due to the possibility to rest the whole weekend home or to spend the whole weekend travelling. 
@@ -394,7 +394,7 @@ csv_tbl_unnested %>%
 
 
 
-#### Price trend three weeks before a flight
+#### **Price trend three weeks before a flight**
 
 
 ```{r Price_trend_per_time_of_the_day_wday_21, a_taller_figure, message = FALSE, warning=FALSE, results='hide'}
@@ -415,7 +415,7 @@ csv_tbl_unnested %>%
 
 
 
-#### Price trend per booking time
+#### **Price trend per booking time**
 
 
 If somebody would check constantly couple of flight tickets on the Ryanair website, he or she would notice prices for these tickets are changing constantly, some of them are increasing in a value and some are decreasing. For this reason it is important to check this assumption and to check a correlation between price and request time first. The data was collected every day at 11 a.m. and 23 p.m.
@@ -440,7 +440,7 @@ _**Yellow** dashed line shows the mean price._
 
 
 
-#### Price trend per booking day
+#### **Price trend per booking day**
 
 
 ```{r price_trend_per_booking_day, a_taller_figure, message = FALSE, warning=FALSE, results='hide'}
@@ -458,7 +458,7 @@ csv_tbl_unnested %>%
 
 
 
-#### Price trend for randomly selected flights
+#### **Price trend for randomly selected flights**
 
 
 Ryanair changes flight prices often and most of the time it is difficult to find the logic behind its changes, for example, the price in the evening can be extremely expensive, but the next day morning it can be unbelievably cheap.
@@ -466,12 +466,12 @@ Ryanair changes flight prices often and most of the time it is difficult to find
 In this section four flights were filtered as an example to show the differences between current and previous price and in general price fluctuations. Two flights from STN-SXF route and two from SXF-STN route were chosen, the main requirement was to choose one evening flight and one next day morning flight, also was important to select two identical flights from the opposite route, so it can possibly be seen if the price changes are connected somehow to each other.
 
 
- Flight_unique_id  | Flight Number | Departure Time |      Date         | Route
--------------------|---------------|----------------|-------------------|----------------
- 2019-07-18 FR 147 | FR 147        | 19:20:00       | Thu 18th of July  | London-Berlin
- 2019-07-18 FR 8542| FR 8542       | 06:30:00       | Fri 19th of July  | London-Berlin
- 2019-07-18 FR 8545| FR 8545       | 22:25:00       | Thu 18th of July  | Berlin-London
- 2019-07-19 FR 144 | FR 144        | 06:30:00       | Fri 19th of July  | Berlin-London
+ **Flight_unique_id**  | **Flight Number** | **Departure Time** | **Date**              | **Route**
+-----------------------|-------------------|--------------------|-----------------------|----------------
+ 2019-07-18 FR 147     | FR 147            | 19:20:00           | Thu 18th of July      | London-Berlin
+ 2019-07-18 FR 8542    | FR 8542           | 06:30:00           | Fri 19th of July      | London-Berlin
+ 2019-07-18 FR 8545    | FR 8545           | 22:25:00           | Thu 18th of July      | Berlin-London
+ 2019-07-19 FR 144     | FR 144            | 06:30:00           | Fri 19th of July      | Berlin-London
  
 Some clear price patterns weren’t found from the plot below, due to the wrong chosen random flights or probably there is no pattern and only accidental dynamic changes. 
 
@@ -508,7 +508,7 @@ ggplot(aes(x=DaysLeft, y= difference_previous_price)) +
 
 
 
-#### Price trend for a random flight
+#### **Price trend for a random flight**
 
 
 ```{r price_trend_random_flight, a_taller_figure, message = FALSE, warning=FALSE, results='hide'}
@@ -525,7 +525,7 @@ ggplot(aes(x=DaysLeft, y= difference_previous_price)) +
 
 
 
-### Conclusion 
+### **Conclusion** 
 
 
 During the visualization analysis it was observed, that the variable DaysLeft describing amount of days left till a departure day and the Price variable have a negative correlation, less days are left till the flight, more expensive the plane tickets cost. 

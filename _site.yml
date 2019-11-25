@@ -7,9 +7,11 @@ navbar:
       href: index.html
     - text: "Flight Data Exploration"
       href: explore.html
+    - text: "San Francisco Crime"
+      href: sfc.html
 output:
   html_document:
-    theme: cosmo
+    theme: flatly
     highlight: textmate
 
 

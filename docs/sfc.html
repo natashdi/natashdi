@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>San Francisco Crime</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h2 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h3 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h4 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h5 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h6 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Data Science Portfolio</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="explore.html">Flight Data Exploration</a>
+</li>
+<li>
+  <a href="sfc.html">San Francisco Crime</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">San Francisco Crime</h1>
+
+</div>
+
+
+<p>In this Kaggle competition the category of crime that occurred in San Francisco was predicted. It was my first Data Science related project during my studies, which I used to understand the steps that should be taken to solve a prediction task.</p>
+<p>Here it can be found a visualization part of the project.</p>
+<p>All of the data was used from the Kaggle website.</p>
+<p>Firstly, necessary packages for the project were imported:</p>
+<pre class="r"><code>library(ggplot2)
+library(vcd)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(scales)
+library(ggmap)
+library(caret)
+library(randomForest)
+library(data.table)
+library(e1071)
+library(LiblineaR)
+library(knitr)
+library(formatR)
+library(kableExtra)</code></pre>
+<div id="training-data-preparation" class="section level3">
+<h3><strong>Training Data preparation</strong></h3>
+<p>Loading data and checking the structure, the number of dimensions, names of variables and the summary of the training data:</p>
+<pre class="r"><code># Import data
+
+train &lt;- read.csv(&quot;/Users/natadi/Documents/San Francisco Crime/train.csv&quot;)
+
+# Training dataset summary
+train %&gt;%
+  head() %&gt;%
+  knitr::kable() %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;,&quot;responsive&quot;)) </code></pre>
+<table class="table table-striped table-hover table-responsive" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Dates
+</th>
+<th style="text-align:left;">
+Category
+</th>
+<th style="text-align:left;">
+Descript
+</th>
+<th style="text-align:left;">
+DayOfWeek
+</th>
+<th style="text-align:left;">
+PdDistrict
+</th>
+<th style="text-align:left;">
+Resolution
+</th>
+<th style="text-align:left;">
+Address
+</th>
+<th style="text-align:right;">
+X
+</th>
+<th style="text-align:right;">
+Y
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+2015-05-13 23:53:00
+</td>
+<td style="text-align:left;">
+WARRANTS
+</td>
+<td style="text-align:left;">
+WARRANT ARREST
+</td>
+<td style="text-align:left;">
+Wednesday
+</td>
+<td style="text-align:left;">
+NORTHERN
+</td>
+<td style="text-align:left;">
+ARREST, BOOKED
+</td>
+<td style="text-align:left;">
+OAK ST / LAGUNA ST
+</td>
+<td style="text-align:right;">
+-122.4259
+</td>
+<td style="text-align:right;">
+37.77460
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2015-05-13 23:53:00
+</td>
+<td style="text-align:left;">
+OTHER OFFENSES
+</td>
+<td style="text-align:left;">
+TRAFFIC VIOLATION ARREST
+</td>
+<td style="text-align:left;">
+Wednesday
+</td>
+<td style="text-align:left;">
+NORTHERN
+</td>
+<td style="text-align:left;">
+ARREST, BOOKED
+</td>
+<td style="text-align:left;">
+OAK ST / LAGUNA ST
+</td>
+<td style="text-align:right;">
+-122.4259
+</td>
+<td style="text-align:right;">
+37.77460
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2015-05-13 23:33:00
+</td>
+<td style="text-align:left;">
+OTHER OFFENSES
+</td>
+<td style="text-align:left;">
+TRAFFIC VIOLATION ARREST
+</td>
+<td style="text-align:left;">
+Wednesday
+</td>
+<td style="text-align:left;">
+NORTHERN
+</td>
+<td style="text-align:left;">
+ARREST, BOOKED
+</td>
+<td style="text-align:left;">
+VANNESS AV / GREENWICH ST
+</td>
+<td style="text-align:right;">
+-122.4244
+</td>
+<td style="text-align:right;">
+37.80041
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2015-05-13 23:30:00
+</td>
+<td style="text-align:left;">
+LARCENY/THEFT
+</td>
+<td style="text-align:left;">
+GRAND THEFT FROM LOCKED AUTO
+</td>
+<td style="text-align:left;">
+Wednesday
+</td>
+<td style="text-align:left;">
+NORTHERN
+</td>
+<td style="text-align:left;">
+NONE
+</td>
+<td style="text-align:left;">
+1500 Block of LOMBARD ST
+</td>
+<td style="text-align:right;">
+-122.4270
+</td>
+<td style="text-align:right;">
+37.80087
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2015-05-13 23:30:00
+</td>
+<td style="text-align:left;">
+LARCENY/THEFT
+</td>
+<td style="text-align:left;">
+GRAND THEFT FROM LOCKED AUTO
+</td>
+<td style="text-align:left;">
+Wednesday
+</td>
+<td style="text-align:left;">
+PARK
+</td>
+<td style="text-align:left;">
+NONE
+</td>
+<td style="text-align:left;">
+100 Block of BRODERICK ST
+</td>
+<td style="text-align:right;">
+-122.4387
+</td>
+<td style="text-align:right;">
+37.77154
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2015-05-13 23:30:00
+</td>
+<td style="text-align:left;">
+LARCENY/THEFT
+</td>
+<td style="text-align:left;">
+GRAND THEFT FROM UNLOCKED AUTO
+</td>
+<td style="text-align:left;">
+Wednesday
+</td>
+<td style="text-align:left;">
+INGLESIDE
+</td>
+<td style="text-align:left;">
+NONE
+</td>
+<td style="text-align:left;">
+0 Block of TEDDY AV
+</td>
+<td style="text-align:right;">
+-122.4033
+</td>
+<td style="text-align:right;">
+37.71343
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>dim(train)</code></pre>
+<pre><code>## [1] 878049      9</code></pre>
+<pre class="r"><code>names(train)</code></pre>
+<pre><code>## [1] &quot;Dates&quot;      &quot;Category&quot;   &quot;Descript&quot;   &quot;DayOfWeek&quot;  &quot;PdDistrict&quot;
+## [6] &quot;Resolution&quot; &quot;Address&quot;    &quot;X&quot;          &quot;Y&quot;</code></pre>
+<div id="missing-values" class="section level4">
+<h4><strong>Missing values</strong></h4>
+<pre class="r"><code>sum(is.null(train))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>sum(is.na(train))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<p>Splitting the column <strong>Dates</strong> from the training set in two columns: <strong>Date</strong> and <strong>Time</strong>.</p>
+<p>Creating additional variables <strong>Year</strong>, <strong>Month</strong> and <strong>Hour</strong> to make it easier to visualize, analyse data and build prediction models.</p>
+<pre class="r"><code># &quot;Dates&quot; column split
+train &lt;- separate(train, Dates, c(&quot;Date&quot;, &quot;Time&quot;), sep =&quot; &quot;, remove = TRUE)
+
+# New variables creation
+train$Year &lt;- as.factor(year(strptime(train$Date, &quot;%Y-%m-%d&quot;)))
+train$Month &lt;- as.factor(month(strptime(train$Date, &quot;%Y-%m-%d&quot;)))
+train$Hour &lt;- as.factor(hour(strptime(train$Time,&quot;%H:%M:%S&quot;)))
+str(train) </code></pre>
+<pre><code>## &#39;data.frame&#39;:    878049 obs. of  13 variables:
+##  $ Date      : chr  &quot;2015-05-13&quot; &quot;2015-05-13&quot; &quot;2015-05-13&quot; &quot;2015-05-13&quot; ...
+##  $ Time      : chr  &quot;23:53:00&quot; &quot;23:53:00&quot; &quot;23:33:00&quot; &quot;23:30:00&quot; ...
+##  $ Category  : Factor w/ 39 levels &quot;ARSON&quot;,&quot;ASSAULT&quot;,..: 38 22 22 17 17 17 37 37 17 17 ...
+##  $ Descript  : Factor w/ 879 levels &quot;ABANDONMENT OF CHILD&quot;,..: 867 811 811 405 405 407 740 740 405 405 ...
+##  $ DayOfWeek : Factor w/ 7 levels &quot;Friday&quot;,&quot;Monday&quot;,..: 7 7 7 7 7 7 7 7 7 7 ...
+##  $ PdDistrict: Factor w/ 10 levels &quot;BAYVIEW&quot;,&quot;CENTRAL&quot;,..: 5 5 5 5 6 3 3 1 7 2 ...
+##  $ Resolution: Factor w/ 17 levels &quot;ARREST, BOOKED&quot;,..: 1 1 1 12 12 12 12 12 12 12 ...
+##  $ Address   : Factor w/ 23228 levels &quot;0 Block of  HARRISON ST&quot;,..: 19791 19791 22698 4267 1844 1506 13323 18055 11385 17659 ...
+##  $ X         : num  -122 -122 -122 -122 -122 ...
+##  $ Y         : num  37.8 37.8 37.8 37.8 37.8 ...
+##  $ Year      : Factor w/ 13 levels &quot;2003&quot;,&quot;2004&quot;,..: 13 13 13 13 13 13 13 13 13 13 ...
+##  $ Month     : Factor w/ 12 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,..: 5 5 5 5 5 5 5 5 5 5 ...
+##  $ Hour      : Factor w/ 24 levels &quot;0&quot;,&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,..: 24 24 24 24 24 24 24 24 24 24 ...</code></pre>
+</div>
+</div>
+<div id="data-visualization" class="section level3">
+<h3><strong>Data Visualization</strong></h3>
+<div id="frequency-of-crimes-in-san-francisco" class="section level4">
+<h4><strong>Frequency of Crimes in San Francisco</strong></h4>
+<p>The histogram shows the most occured categories of crimes are: “Larceny/Theft”, “Other Offences”, “Non-Criminal”, “Assault”, “Vehicle Theft”, “Drug/Narcotic”, “Warrants”, “Vandalism”, “Burglary”, “Suspicious Occ”,“Robbery” and “Fraud”.</p>
+<p>It can be concluded that these categories appeared in around of 80% of all events.</p>
+<pre class="r"><code>ggplot(data = train,aes(x = Category)) +  
+    geom_bar(fill = &quot;steelblue3&quot;) +
+  ggtitle(&quot;Frequency of Crimes in San Francisco&quot;) +
+  xlab(&quot;&quot;)+
+  ylab(&quot;Count&quot;) +
+  coord_flip() +
+  theme(
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 8),
+    legend.position = &quot;None&quot;,
+    panel.background = element_rect(fill = &quot;white&quot;), 
+    panel.grid.major = element_line(colour = &quot;grey90&quot;),
+    axis.line = element_line(size = 0.4, linetype = &quot;solid&quot;)) +
+   scale_y_continuous(labels = scales::comma) </code></pre>
+<p><img src="sfc_files/figure-html/freq_hist,%20a_taller_figure-1.png" width="672" /></p>
+</div>
+<div id="number-of-crimes-by-a-weekday" class="section level4">
+<h4><strong>Number of Crimes by a weekday</strong></h4>
+<p>This histogram demonstrates that on days as Friday, Wednesday and Saturday the most crimes took a part:</p>
+<pre class="r"><code>DOW &lt;- count(train, DayOfWeek)
+summary(train$DayOfWeek)</code></pre>
+<pre><code>##    Friday    Monday  Saturday    Sunday  Thursday   Tuesday Wednesday 
+##    133734    121584    126810    116707    125038    124965    129211</code></pre>
+<pre class="r"><code>DOW$DayOfWeek &lt;- factor(DOW$DayOfWeek, levels = c(&quot;Monday&quot;, &quot;Tuesday&quot;, &quot;Wednesday&quot;, 
+                                                 &quot;Thursday&quot;, &quot;Friday&quot;, &quot;Saturday&quot;, &quot;Sunday&quot;))
+
+ggplot(DOW, aes(x = reorder(DayOfWeek,-n), y = n, fill = n)) +  
+  geom_bar(
+      stat = &quot;identity&quot;, 
+      width = 0.9,
+      color = &quot;slategray&quot;) +
+  geom_text(
+    aes(label= n),
+    color=&quot;black&quot;, 
+    vjust=1.6, 
+    size=3.5) +
+  scale_fill_gradient(
+     low=&quot;steelblue1&quot;, high=&quot;steelblue4&quot;) +
+  theme(
+    legend.position = &quot;None&quot;,
+    panel.background = element_rect(fill = &quot;white&quot;), 
+    panel.grid.major = element_line(colour = &quot;grey90&quot;),
+    axis.line = element_line(size = 0.4, linetype = &quot;solid&quot;),
+    axis.text.x = element_text(size=11),
+    axis.text.y = element_text(size = 10)) +
+   scale_y_continuous(labels = comma) +
+  ggtitle(&quot;Number of crimes by a day of week&quot;) +
+  xlab(&quot;&quot;)+
+  ylab(&quot;Count&quot;) </code></pre>
+<p><img src="sfc_files/figure-html/wd_freq_hist,%20a_taller_figure-1.png" width="672" /></p>
+</div>
+<div id="number-of-crimes-per-a-district" class="section level4">
+<h4><strong>Number of Crimes per a district</strong></h4>
+<p>The graph shows that the most dangerous districts are “Southern”, “Mission” and “Northern”.</p>
+<pre class="r"><code>distr &lt;- count(train, PdDistrict)
+head(distr)</code></pre>
+<pre><code>## # A tibble: 6 x 2
+##   PdDistrict      n
+##   &lt;fct&gt;       &lt;int&gt;
+## 1 BAYVIEW     89431
+## 2 CENTRAL     85460
+## 3 INGLESIDE   78845
+## 4 MISSION    119908
+## 5 NORTHERN   105296
+## 6 PARK        49313</code></pre>
+<pre class="r"><code>levels(train$PdDistrict)</code></pre>
+<pre><code>##  [1] &quot;BAYVIEW&quot;    &quot;CENTRAL&quot;    &quot;INGLESIDE&quot;  &quot;MISSION&quot;    &quot;NORTHERN&quot;  
+##  [6] &quot;PARK&quot;       &quot;RICHMOND&quot;   &quot;SOUTHERN&quot;   &quot;TARAVAL&quot;    &quot;TENDERLOIN&quot;</code></pre>
+<pre class="r"><code>ggplot(distr, aes(x = reorder(PdDistrict,-n), y = n, fill = n)) +  
+    geom_bar(
+      stat = &quot;identity&quot;, 
+      width = 0.9) +
+  scale_fill_gradient(low=&quot;steelblue1&quot;, high=&quot;steelblue4&quot;) +
+  theme(
+    axis.text.x = element_text(
+      angle = 65,
+      vjust = 0.5,
+      size=11),
+    axis.text.y = element_text(size = 10),
+    legend.position = &quot;None&quot;,
+    panel.background = element_rect(fill = &quot;white&quot;), 
+    panel.grid.major = element_line(colour = &quot;grey90&quot;),
+    axis.line = element_line
+    (size = 0.4, linetype = &quot;solid&quot;)) +
+   scale_y_continuous(labels = scales::comma)+
+   geom_text(
+    aes(label= n),
+    color=&quot;black&quot;, 
+    vjust=1.6, 
+    size=3.5) + 
+  ggtitle(&quot;Number of crimes in different districts&quot;) +
+  xlab(&quot;&quot;)+
+  ylab(&quot;Count&quot;)</code></pre>
+<p><img src="sfc_files/figure-html/distr_freq_hist,%20a_taller_figure-1.png" width="672" /></p>
+</div>
+<div id="time-graphs" class="section level4">
+<h4><strong>Time graphs</strong></h4>
+<p>The most crimes were comitted in 2013.</p>
+<pre class="r"><code>ggplot(data=train, aes(x=Year)) +
+  geom_bar(colour=&quot;black&quot;, fill=&quot;steelblue2&quot;) +
+  ylab(&quot;Count&quot;) +
+  xlab(&quot;&quot;) +
+  ggtitle(&quot;Number of Crimes in a Year&quot;) +
+  theme(
+    axis.text.x = element_text(size = 11),
+    axis.text.y = element_text(size = 10),
+    legend.position = &quot;None&quot;,
+    panel.background = element_rect(fill = &quot;white&quot;), 
+    panel.grid.major = element_line(colour = &quot;grey90&quot;),
+    axis.line = element_line(size = 0.4, linetype = &quot;solid&quot;)) +
+   scale_y_continuous(labels = scales::comma)</code></pre>
+<p><img src="sfc_files/figure-html/year_hist,%20a_taller_figure-1.png" width="672" /></p>
+<p>Crimes tend to happen at 12 am, between 4 pm and 7 pm and in the midnight.</p>
+<pre class="r"><code>ggplot(data=train, aes(x=Hour)) +
+  geom_bar(colour=&quot;black&quot;, fill=&quot;steelblue2&quot;) +
+  ylab(&quot;Count&quot;)+
+  xlab(&quot;&quot;) +
+  ggtitle(&quot;Number of Crimes in an Hour&quot;) +
+  theme(
+    axis.text.x = element_text(size = 11),
+    axis.text.y = element_text(size = 10),
+    legend.position = &quot;None&quot;,
+    panel.background = element_rect(fill = &quot;white&quot;), 
+    panel.grid.major = element_line(colour = &quot;grey90&quot;),
+    axis.line = element_line(size = 0.4, linetype = &quot;solid&quot;)) +
+   scale_y_continuous(labels = scales::comma)</code></pre>
+<p><img src="sfc_files/figure-html/hour_hist,%20a_taller_figure-1.png" width="672" /></p>
+<p>The graph below shows that in spring months and in October crimes occured the most.</p>
+<pre class="r"><code>ggplot(data=train, aes(x=Month)) +
+  geom_bar(colour=&quot;black&quot;, fill=&quot;steelblue2&quot;) +
+  ylab(&quot;Count&quot;) +
+  xlab(&quot;&quot;) +
+  ggtitle(&quot;Number of Crimes in a Month&quot;) +
+  theme(
+    axis.text.x = element_text(size = 11),
+    axis.text.y = element_text(size = 10),
+    legend.position = &quot;None&quot;,
+    panel.background = element_rect(fill = &quot;white&quot;), 
+    panel.grid.major = element_line(colour = &quot;grey90&quot;),
+    axis.line = element_line(size = 0.4, linetype = &quot;solid&quot;)) +
+   scale_y_continuous(labels = scales::comma)</code></pre>
+<p><img src="sfc_files/figure-html/month_hist,%20a_taller_figure-1.png" width="672" /></p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
